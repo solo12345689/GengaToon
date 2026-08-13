@@ -368,8 +368,9 @@ def hls_proxy(url: str):
         print(f"HLS proxy error: {str(e)}")
         raise HTTPException(status_code=502, detail=str(e))
 
-# Serve static files from 'public' directory
-app.mount("/", StaticFiles(directory="public", html=True), name="public")
-
+# Serve static files from Vite's 'dist' build directory
+import os
+if os.path.exists("dist"):
+    app.mount("/", StaticFiles(directory="dist", html=True), name="dist")
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=3000, reload=True)
