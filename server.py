@@ -369,8 +369,17 @@ def hls_proxy(url: str):
         raise HTTPException(status_code=502, detail=str(e))
 
 # Serve static files from Vite's 'dist' build directory
+# Serve static files from Vite's 'dist' build directory
 import os
 if os.path.exists("dist"):
-    app.mount("/", StaticFiles(directory="dist", html=True), name="dist")
+    app.mount("/assets", StaticFiles(directory="dist/assets"), name="assets")
+    
+    @app.get("/{full_path:path}")
+    def serve_spa(full_path: str):
+        # Allow API routes to pass through (though they should be matched first)
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API route not found")
+        # Serve index.html for all other routes
+        return HTMLResponse(open("dist/index.html", "r", encoding="utf-8").read())
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=3000, reload=True)
